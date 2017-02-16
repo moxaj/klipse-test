@@ -53,8 +53,8 @@
 
 Visit http://app.klipse.tech/.
 
-- **Scenario 1**: evaluated **Snippet 1**, then evaluate **Snippet 2**. Both compile to _correct_ js.
-- **Scenario 2**: evaluated **Snippet 2**, then evaluate **Snippet 1**. Both compile to _incorrect_ js.
+- **Scenario 1**: evaluate **Snippet 1**, then **Snippet 2**. Both compile to _correct_ js.
+- **Scenario 2**: evaluate **Snippet 2**, then **Snippet 1**. Both compile to _incorrect_ js.
 
 _Correct_ js   = `klipse_test.b.asdf = (10);` at the end
 
