@@ -1,36 +1,61 @@
 # klipse-test
 
-FIXME: description
+**Snippet 1:**
 
-## Installation
+```clojure
+(ns foo.bar
+  (:require [cljs.js :as cjs]))
 
-Download from http://example.com/FIXME.
+(def state (cjs/empty-state))
 
-## Usage
+(defn compile [source opts]
+  (cjs/compile-str state source "" opts #(println (:value %))))
 
-FIXME: explanation
+(def source-a
+  "(ns klipse-test.a
+     #?(:cljs (:require-macros [klipse-test.a])))
 
-    $ java -jar klipse-test-0.1.0-standalone.jar [args]
+   (defmacro x [sym]
+     `(def ~sym 10))")
 
-## Options
+(def source-b
+  "(ns klipse-test.b
+     (:require [klipse-test.a :refer [x]]))
 
-FIXME: listing of options this app accepts.
+   (x asdf)")
 
-## Examples
+(def deps
+  {'klipse-test.a source-a
+   'klipse-test.b source-b})
 
-...
+(defn load-ns [opts cb]
+  (cb {:lang :clj :source (deps (:name opts))}))
 
-### Bugs
+(compile source-a {:eval cjs/js-eval :load load-ns})
 
-...
+(compile source-b {:eval cjs/js-eval :load load-ns})
+```
 
-### Any Other Sections
-### That You Think
-### Might be Useful
+**Snippet 2:**
 
-## License
+```clojure
+(ns klipse-test.a
+  #?(:cljs (:require-macros [klipse-test.a])))
 
-Copyright © 2017 FIXME
+(defmacro x [sym]
+  `(def ~sym 10))
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+(ns klipse-test.b
+  (:require [klipse-test.a :refer [x]]))
+
+(x asdf)
+```
+
+Visit http://app.klipse.tech/.
+
+- **Scenario 1**: evaluated **Snippet 1**, then evaluate **Snippet 2**. Both compile to _correct_ js.
+- **Scenario 2**: evaluated **Snippet 2**, then evaluate **Snippet 1**. Both compile to _incorrect_ js.
+
+_Correct_ js   = `klipse_test.b.asdf = (10);` at the end
+
+_Incorrect_ js = `klipse_test.a.x.call(null,klipse_test.b.asdf);` at the end
